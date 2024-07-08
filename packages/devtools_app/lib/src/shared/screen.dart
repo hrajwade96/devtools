@@ -75,6 +75,8 @@ enum ScreenMetaData {
     icon: Icons.network_check,
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=547',
+    // ignore: avoid_redundant_argument_values, false positive
+    worksWithOfflineData: FeatureFlags.networkOffline,
   ),
   logging(
     'logging',

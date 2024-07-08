@@ -3,19 +3,23 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/http/http_service.dart' as http_service;
+import '../../shared/offline_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
+import 'har_builder.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
@@ -46,6 +50,7 @@ class NetworkController extends DisposableController
     with
         SearchControllerMixin<NetworkRequest>,
         FilterControllerMixin<NetworkRequest>,
+        OfflineScreenControllerMixin,
         AutoDisposeControllerMixin {
   NetworkController() {
     _networkService = NetworkService(this);
@@ -55,6 +60,33 @@ class NetworkController extends DisposableController
       _filterAndRefreshSearchMatches,
     );
     subscribeToFilterChanges();
+  }
+  List<DartIOHttpRequestData>? httpRequests;
+
+  String? exportAsHarFile() {
+    final exportController = ExportController();
+    httpRequests =
+        filteredData.value.whereType<DartIOHttpRequestData>().toList();
+
+    if (httpRequests!.isEmpty) {
+      debugPrint('No valid request data to export');
+      return '';
+    }
+
+    try {
+      if (httpRequests != null && httpRequests!.isNotEmpty) {
+        // Build the HAR object
+        final har = buildHar(httpRequests!);
+        debugPrint('data is ${json.encode(har)}');
+        return exportController.downloadFile(
+          json.encode(har),
+          type: ExportFileType.har,
+        );
+      }
+    } catch (ex) {
+      debugPrint('Exception in export $ex');
+    }
+    return null;
   }
 
   static const methodFilterId = 'network-method-filter';
@@ -360,6 +392,25 @@ class NetworkController extends DisposableController
       serviceConnection.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
     }
   }
+
+  @override
+  OfflineScreenData prepareOfflineScreenData() {
+    final requests =
+        filteredData.value.whereType<DartIOHttpRequestData>().toList();
+    return OfflineScreenData(
+      screenId: NetworkScreen.id,
+      data: convertRequestsToMap(requests),
+    );
+  }
+}
+
+Map<String, Object> convertRequestsToMap(
+  List<DartIOHttpRequestData>? requests,
+) {
+  if (requests == null) return {};
+  return {
+    'requests': requests.map((request) => request.toMap()).toList(),
+  };
 }
 
 /// Class for managing the set of all current websocket requests, and
