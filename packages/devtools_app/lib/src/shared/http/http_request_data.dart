@@ -47,9 +47,10 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   factory DartIOHttpRequestData.fromJson(
-      Map<String, dynamic> modifiedRequestData,
-      Map<String, Object?> requestPostData,
-      Map<String, Object?> responseContent) {
+    Map<String, dynamic> modifiedRequestData,
+    Map<String, Object?> requestPostData,
+    Map<String, Object?> responseContent,
+  ) {
     return DartIOHttpRequestData(
       HttpProfileRequestRef.parse(modifiedRequestData)!,
       requestFullDataFromVmService: false,
