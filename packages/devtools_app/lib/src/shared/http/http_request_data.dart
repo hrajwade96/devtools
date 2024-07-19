@@ -46,6 +46,19 @@ class DartIOHttpRequestData extends NetworkRequest {
     }
   }
 
+  factory DartIOHttpRequestData.fromJson(
+    Map<String, dynamic> modifiedRequestData,
+    Map<String, Object?> requestPostData,
+    Map<String, Object?> responseContent,
+  ) {
+    return DartIOHttpRequestData(
+      HttpProfileRequestRef.parse(modifiedRequestData)!,
+      requestFullDataFromVmService: false,
+    )
+      .._responseBody = responseContent['text'].toString()
+      .._requestBody = requestPostData['text'].toString();
+  }
+
   static const _connectionInfoKey = 'connectionInfo';
   static const _contentTypeKey = 'content-type';
   static const _localPortKey = 'localPort';
