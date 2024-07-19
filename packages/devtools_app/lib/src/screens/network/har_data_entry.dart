@@ -19,7 +19,7 @@ class HarDataEntry {
     _convertHeaders(json);
 
     final modifiedRequestData =
-        _remapCustomFieldKeys(json) as Map<String, dynamic>;
+        _remapCustomFieldKeys(json);
 
     // Retrieving url, method from requestData
     modifiedRequestData['uri'] =
@@ -182,13 +182,13 @@ class HarDataEntry {
     return request;
   }
 
-  static Map<String, dynamic> _convertHeadersListToMap(
-    List<dynamic> serializedHeaders,
+  static Map<String, Object?> _convertHeadersListToMap(
+    List<Object?> serializedHeaders,
   ) {
-    final transformedHeaders = <String, dynamic>{};
+    final transformedHeaders = <String, Object?>{};
 
     for (final header in serializedHeaders) {
-      if (header is Map<String, dynamic>) {
+      if (header is Map<String, Object?>) {
         final key = header[NetworkEventKeys.name.name] as String?;
         final value = header[NetworkEventKeys.value.name];
 
@@ -210,7 +210,7 @@ class HarDataEntry {
   }
 
   // Convert list of headers to map
-  static void _convertHeaders(Map<String, dynamic> requestData) {
+  static void _convertHeaders(Map<String, Object?> requestData) {
     // Request Headers
     if (requestData['request'] != null &&
         (requestData['request'] as Map<String, Object?>)['headers'] != null) {
@@ -218,7 +218,7 @@ class HarDataEntry {
         (requestData['request'] as Map<String, Object?>)['headers'] =
             _convertHeadersListToMap(
           ((requestData['request'] as Map<String, Object?>)['headers'])
-              as List<dynamic>,
+              as List<Object?>,
         );
       }
     }
@@ -231,7 +231,7 @@ class HarDataEntry {
         (requestData['response'] as Map<String, Object?>)['headers'] =
             _convertHeadersListToMap(
           ((requestData['response'] as Map<String, Object?>)['headers'])
-              as List<dynamic>,
+              as List<Object?>,
         );
       }
     }
@@ -252,7 +252,7 @@ class HarDataEntry {
           NetworkEventCustomFieldRemappedKeys.events.name,
     };
 
-    final convertedMap = <String, dynamic>{};
+    final convertedMap = <String, Object?>{};
 
     originalMap.forEach((key, value) {
       if (replacementMap.containsKey(key)) {
@@ -266,7 +266,7 @@ class HarDataEntry {
   }
 }
 
-int _calculateHeadersSize(Map<String, dynamic>? headers) {
+int _calculateHeadersSize(Map<String, Object?>? headers) {
   if (headers == null) return -1;
 
   // Combine headers into a single string with CRLF endings
